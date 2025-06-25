@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:outfitaura/pages/home_page.dart';
 import 'package:provider/provider.dart';
-import 'package:outfitaura/viewmodels/wardrobe_viewmodel.dart';
+import 'package:outfitaura/pages/home_page.dart';
+import 'package:outfitaura/pages/marketplace_page.dart';
+import 'package:outfitaura/pages/selection_page.dart';
 import 'package:outfitaura/pages/login_page.dart';
 import 'package:outfitaura/pages/wardrobe_page.dart';
 import 'package:outfitaura/pages/recommendation_page.dart';
 import 'package:outfitaura/pages/favorites_page.dart';
+import 'package:outfitaura/viewmodels/wardrobe_viewmodel.dart';
+import 'package:outfitaura/viewmodels/marketplace_viewmodel.dart'; // Add this import
 
 void main() {
   runApp(const MyApp());
@@ -16,13 +19,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => WardrobeViewModel()..fetchWardrobe(), // Initialize wardrobe data
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => WardrobeViewModel()..fetchWardrobe()), // Existing provider
+        ChangeNotifierProvider(create: (_) => MarketplaceViewModel()..fetchProducts()), // Add this provider
+      ],
       child: MaterialApp(
         title: 'OutfitAura',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: ThemeData(primarySwatch: Colors.blue),
         home: const LoginPage(),
         debugShowCheckedModeBanner: false,
         initialRoute: '/login',
@@ -39,6 +43,7 @@ class MyApp extends StatelessWidget {
             case '/favorites':
               return MaterialPageRoute(builder: (_) => const FavoritesPage());
             case '/marketplace':
+              return MaterialPageRoute(builder: (_) => const MarketplacePage());
             case '/cart':
               return MaterialPageRoute(
                 builder: (_) => const Scaffold(

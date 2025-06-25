@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:outfitaura/models/clothing_item.dart';
+import 'package:outfitaura/models/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -305,4 +306,75 @@ static Future<List<Map<String, dynamic>>> getFavoriteOutfits() async {
     throw Exception('Error fetching favorite outfits: $e');
   }
 }
+static Future<List<Product>> getMarketplaceProducts() async {
+  try {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/marketplace'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Product.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch products: ${response.body}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching products: $e');
+  }
+}
+
+static Future<void> uploadMarketplaceProduct(String title, String description, double price, XFile image) async {
+  try {
+    final token = await getToken();
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/marketplace'));
+    request.headers['Authorization'] = 'Bearer $token';
+    request.fields['title'] = title;
+    request.fields['description'] = description;
+    request.fields['price'] = price.toString();
+    request.files.add(await http.MultipartFile.fromPath('image', image.path));
+    final response = await request.send();
+    if (response.statusCode != 201) {
+      throw Exception('Failed to upload product: ${await response.stream.bytesToString()}');
+    }
+  } catch (e) {
+    throw Exception('Error uploading product: $e');
+  }
+}
+
+static Future<void> updateMarketplaceProduct(String id, String title, String description, double price, XFile? image) async {
+  try {
+    final token = await getToken();
+    var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/api/marketplace/$id'));
+    request.headers['Authorization'] = 'Bearer $token';
+    request.fields['title'] = title;
+    request.fields['description'] = description;
+    request.fields['price'] = price.toString();
+    if (image != null) {
+      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+    }
+    final response = await request.send();
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update product: ${await response.stream.bytesToString()}');
+    }
+  } catch (e) {
+    throw Exception('Error updating product: $e');
+  }
+}
+
+static Future<void> deleteMarketplaceProduct(String id) async {
+  try {
+    final token = await getToken();
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/marketplace/$id'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete product: ${response.body}');
+    }
+  } catch (e) {
+    throw Exception('Error deleting product: $e');
+  }
+}
+
 }
