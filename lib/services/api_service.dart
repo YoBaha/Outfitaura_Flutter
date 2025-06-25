@@ -151,27 +151,25 @@ static Future<void> uploadClothingItem(String title, XFile image) async {
   }
 }
 
-  static Future<List<ClothingItem>> getWardrobe() async {
-    try {
-      final token = await getToken();
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/wardrobe'),
-        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
-      );
-      debugPrint('Wardrobe response: ${response.statusCode}');
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((item) => ClothingItem.fromJson(item)).toList();
-      } else {
-        debugPrint('Wardrobe error: ${response.body}');
-        throw Exception('Failed to fetch wardrobe: ${response.body}');
-      }
-    } catch (e) {
-      debugPrint('Error fetching wardrobe: $e');
-      throw Exception('Error fetching wardrobe: $e');
+static Future<List<ClothingItem>> getWardrobe() async {
+  try {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/wardrobe'),
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+    );
+    debugPrint('Wardrobe response: ${response.statusCode}, Body: ${response.body}'); // Debug log
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => ClothingItem.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to fetch wardrobe: ${response.body}');
     }
+  } catch (e) {
+    debugPrint('Error fetching wardrobe: $e');
+    throw Exception('Error fetching wardrobe: $e');
   }
-
+}
   static Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/login'),
@@ -252,6 +250,59 @@ static Future<void> uploadClothingItem(String title, XFile image) async {
   } catch (e) {
     debugPrint('Error deleting clothing item: $e');
     throw Exception('Error deleting clothing item: $e');
+  }
+}
+
+static Future<void> saveFavoriteOutfit(Map<String, dynamic> outfitData) async {
+  try {
+    final token = await getToken();
+    debugPrint('Saving favorite outfit with token: $token');
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/favorites'),
+      headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+      body: jsonEncode({'items': outfitData['items']}),
+    );
+    debugPrint('Save favorite response: ${response.statusCode}');
+    if (response.statusCode != 201) {
+      final responseBody = jsonDecode(response.body);
+      debugPrint('Save favorite error: $responseBody');
+      throw Exception('Failed to save favorite outfit: ${responseBody['message']}');
+    }
+  } catch (e) {
+    debugPrint('Error saving favorite outfit: $e');
+    throw Exception('Error saving favorite outfit: $e');
+  }
+}
+
+static Future<List<Map<String, dynamic>>> getFavoriteOutfits() async {
+  try {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/favorites'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    debugPrint('Get favorites response: ${response.statusCode}');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => {
+        'id': item['_id'],
+        'items': (item['items'] as List).map((i) => {
+          'type': i['type'],
+          'clothingItemId': i['clothingItemId']['_id'],
+          'title': i['title'],
+          'imageUrl': i['imageUrl'],
+          'createdAt': DateTime.parse(i['createdAt']),
+        }).toList(),
+        'createdAt': DateTime.parse(item['createdAt']),
+      }).toList();
+    } else {
+      debugPrint('Get favorites error: ${response.body}');
+      throw Exception('Failed to fetch favorite outfits: ${response.body}');
+    }
+  } catch (e) {
+    debugPrint('Error fetching favorite outfits: $e');
+    throw Exception('Error fetching favorite outfits: $e');
   }
 }
 }

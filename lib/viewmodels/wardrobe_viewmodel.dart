@@ -13,20 +13,22 @@ class WardrobeViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> fetchWardrobe() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+Future<void> fetchWardrobe() async {
+  _isLoading = true;
+  _errorMessage = null;
+  notifyListeners();
 
-    try {
-      _items = await ApiService.getWardrobe();
-    } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+  try {
+    _items = await ApiService.getWardrobe();
+    debugPrint('Fetched wardrobe items: ${_items.map((i) => i.title).join(', ')}'); // Debug log
+  } catch (e) {
+    _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    debugPrint('Fetch error: $_errorMessage');
+  } finally {
+    _isLoading = false;
+    notifyListeners();
   }
+}
 
   Future<void> uploadClothingItem(String title, XFile image) async {
     _isLoading = true;
