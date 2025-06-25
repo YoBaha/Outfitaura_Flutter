@@ -28,22 +28,36 @@ class WardrobeViewModel extends ChangeNotifier {
     }
   }
 
-Future<void> uploadClothingItem(String title, XFile image) async {
-  _isLoading = true;
-  _errorMessage = null;
-  debugPrint('Starting upload for title: $title, image: ${image.path}');
-  notifyListeners();
-
-  try {
-    await ApiService.uploadClothingItem(title, image);
-    debugPrint('Upload successful, refreshing wardrobe');
-    await fetchWardrobe();
-  } catch (e) {
-    _errorMessage = e.toString().replaceFirst('Exception: ', '');
-    debugPrint('Upload error: $_errorMessage');
-  } finally {
-    _isLoading = false;
+  Future<void> uploadClothingItem(String title, XFile image) async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
+    try {
+      await ApiService.uploadClothingItem(title, image);
+      await fetchWardrobe(); // Refresh wardrobe after upload
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
-}
+
+  Future<void> deleteClothingItem(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await ApiService.deleteClothingItem(id);
+      _items.removeWhere((item) => item.id == id);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

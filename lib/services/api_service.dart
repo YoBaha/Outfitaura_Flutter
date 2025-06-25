@@ -233,4 +233,25 @@ static Future<void> uploadClothingItem(String title, XFile image) async {
     await prefs.remove('token');
     await prefs.remove('user');
   }
+
+  static Future<void> deleteClothingItem(String id) async {
+  try {
+    final token = await getToken();
+    debugPrint('Deleting item with id: $id, token: $token');
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/wardrobe/$id'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    debugPrint('Delete response: ${response.statusCode}');
+    if (response.statusCode != 200) {
+      final responseBody = jsonDecode(response.body);
+      debugPrint('Delete error: $responseBody');
+      throw Exception('Failed to delete clothing item: ${responseBody['message']}');
+    }
+  } catch (e) {
+    debugPrint('Error deleting clothing item: $e');
+    throw Exception('Error deleting clothing item: $e');
+  }
+}
 }
