@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:outfitaura/pages/cart_page.dart';
+import 'package:outfitaura/viewmodels/cart_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:outfitaura/pages/home_page.dart';
 import 'package:outfitaura/pages/marketplace_page.dart';
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => WardrobeViewModel()..fetchWardrobe()), // Existing provider
         ChangeNotifierProvider(create: (_) => MarketplaceViewModel()..fetchProducts()), // Add this provider
+        ChangeNotifierProvider(create: (_) => CartViewModel()..fetchCart()), // Add this provider
       ],
       child: MaterialApp(
         title: 'OutfitAura',
@@ -45,11 +48,7 @@ class MyApp extends StatelessWidget {
             case '/marketplace':
               return MaterialPageRoute(builder: (_) => const MarketplacePage());
             case '/cart':
-              return MaterialPageRoute(
-                builder: (_) => const Scaffold(
-                  body: Center(child: Text('Page not implemented yet')),
-                ),
-              );
+              return MaterialPageRoute(builder: (_) => const CartPage()); 
             default:
               return MaterialPageRoute(
                 builder: (_) => const Scaffold(
