@@ -192,7 +192,14 @@ static Future<List<ClothingItem>> getWardrobe() async {
     }
   }
 
-  static Future<Map<String, dynamic>> signup(String name, String email, String password, String confirmPassword, int age) async {
+ static Future<Map<String, dynamic>> signup(
+    String name,
+    String email,
+    String password,
+    String confirmPassword,
+    int age,
+    String gender, // Added gender parameter
+  ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/signup'),
       headers: {'Content-Type': 'application/json'},
@@ -202,6 +209,7 @@ static Future<List<ClothingItem>> getWardrobe() async {
         'password': password,
         'confirmPassword': confirmPassword,
         'age': age,
+        'gender': gender, // Added gender to the body
       }),
     );
     if (response.statusCode == 201) {

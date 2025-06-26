@@ -15,6 +15,7 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _ageController = TextEditingController();
+  String? _gender; // Store selected gender
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -44,6 +45,14 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
+    if (_gender == null) {
+      setState(() {
+        _errorMessage = 'Please select a gender';
+        _isLoading = false;
+      });
+      return;
+    }
+
     try {
       final response = await ApiService.signup(
         _nameController.text,
@@ -51,6 +60,7 @@ class _SignupPageState extends State<SignupPage> {
         _passwordController.text,
         _confirmPasswordController.text,
         age,
+        _gender!,
       );
       setState(() {
         _isLoading = false;
@@ -181,6 +191,35 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ),
                       keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 15),
+                    DropdownButtonFormField<String>(
+                      value: _gender,
+                      hint: const Text('Select Gender', style: TextStyle(color: Colors.white)),
+                      decoration: const InputDecoration(
+                        labelText: 'Gender',
+                        labelStyle: TextStyle(color: Colors.white),
+                        filled: true,
+                        fillColor: Color(0xFFDDEAE0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'male',
+                          child: Text('Male', style: TextStyle(color: Colors.black)),
+                        ),
+                        DropdownMenuItem(
+                          value: 'female',
+                          child: Text('Female', style: TextStyle(color: Colors.black)),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _gender = value;
+                        });
+                      },
                     ),
                     const SizedBox(height: 20),
                     if (_errorMessage != null)

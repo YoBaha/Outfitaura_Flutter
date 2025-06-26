@@ -3,6 +3,7 @@ import 'package:outfitaura/pages/login_page.dart';
 import 'package:outfitaura/pages/recommendation_page.dart';
 import 'package:outfitaura/services/api_service.dart';
 import 'package:outfitaura/pages/wardrobe_page.dart';
+import 'package:outfitaura/pages/statistics_page.dart'; // Added for navigation
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -68,29 +69,35 @@ class HomePage extends StatelessWidget {
                   )),
           const SizedBox(width: 8),
           _categoryIcon(Icons.store, 'Marketplace', primaryColor,
-              onTap: () {
-                // Add MarketplaceScreen navigation (assuming it exists or will be created)
-                // Placeholder: Replace with actual screen
-                Navigator.pushNamed(context, '/marketplace');
-              }),
+              onTap: () => Navigator.pushNamed(context, '/marketplace')),
           const SizedBox(width: 8),
           _categoryIcon(Icons.style, 'Wardrobe', primaryColor,
-              onTap: () {
-                // Add WardrobeScreen navigation (assuming it will be created)
-                Navigator.pushNamed(context, '/wardrobe');
-              }),
+              onTap: () => Navigator.pushNamed(context, '/wardrobe')),
           const SizedBox(width: 8),
           _categoryIcon(Icons.shopping_cart, 'Cart', primaryColor,
-              onTap: () {
-                // Add CartScreen navigation (assuming it will be created)
-                Navigator.pushNamed(context, '/cart');
-              }),
+              onTap: () => Navigator.pushNamed(context, '/cart')),
           const SizedBox(width: 8),
           _categoryIcon(Icons.favorite, 'Favorites', primaryColor,
-              onTap: () {
-                // Add FavoritesScreen navigation (assuming it will be created)
-                Navigator.pushNamed(context, '/favorites');
-              }),
+              onTap: () => Navigator.pushNamed(context, '/favorites')),
+          // Add Statistics for admins
+          FutureBuilder<Map<String, dynamic>?>(
+            future: ApiService.getUser(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
+                return const SizedBox.shrink();
+              }
+              if (snapshot.data?['role'] == 'admin') {
+                return Row(
+                  children: [
+                    const SizedBox(width: 8),
+                    _categoryIcon(Icons.bar_chart, 'Statistics', primaryColor,
+                        onTap: () => Navigator.pushNamed(context, '/statistics')),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
     );
@@ -184,9 +191,9 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _buildSearchField(const Color(0xFF007180)), // Added search field
+                      _buildSearchField(const Color(0xFF007180)),
                       const SizedBox(height: 20),
-                      _buildCategoryRow(context, const Color(0xFF007180)), // Added category row
+                      _buildCategoryRow(context, const Color(0xFF007180)),
                       const SizedBox(height: 20),
                       Card(
                         color: const Color(0xFF82BECC),
