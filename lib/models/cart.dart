@@ -17,18 +17,20 @@ class CartItem {
     this.quantity = 1,
   });
 
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
-      id: json['_id'] as String,
-      productId: (json['productId'] is Map<String, dynamic>)
-          ? json['productId']['_id'] as String
-          : json['productId'] as String, // Handle both populated and non-populated cases
-      title: json['title'] as String,
-      price: (json['price'] as num).toDouble(),
-      imageUrl: json['imageUrl'] as String,
-      quantity: json['quantity'] as int,
-    );
-  }
+factory CartItem.fromJson(Map<String, dynamic> json) {
+  return CartItem(
+    id: json['_id'] as String? ?? '',
+    productId: json['productId'] != null
+        ? (json['productId'] is Map<String, dynamic>
+            ? json['productId']['_id'] as String? ?? ''
+            : json['productId'] as String? ?? '')
+        : '',
+    title: json['title'] as String? ?? 'Unknown',
+    price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    imageUrl: json['imageUrl'] as String? ?? '',
+    quantity: json['quantity'] as int? ?? 1,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {

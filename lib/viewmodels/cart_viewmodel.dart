@@ -15,37 +15,37 @@ class CartViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> fetchCart() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+Future<void> fetchCart() async {
+  _isLoading = true;
+  _errorMessage = null;
+  notifyListeners();
 
-    try {
-      final token = await ApiService.getToken();
-      final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/api/cart'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      debugPrint('Cart response: ${response.statusCode}, Body: ${response.body}');
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data is Map<String, dynamic>) {
-          final cart = Cart.fromJson(data);
-          _items = cart.items;
-          _totalPrice = cart.totalPrice;
-        } else {
-          throw Exception('Invalid cart data format');
-        }
+  try {
+    final token = await ApiService.getToken();
+    final response = await http.get(
+      Uri.parse('${ApiService.baseUrl}/api/cart'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    debugPrint('Cart response: ${response.statusCode}, Body: ${response.body}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is Map<String, dynamic> && data.containsKey('items')) {
+        final cart = Cart.fromJson(data);
+        _items = cart.items;
+        _totalPrice = cart.totalPrice;
       } else {
-        throw Exception('Failed to fetch cart: ${response.body}');
+        throw Exception('Invalid cart data format: Missing required fields');
       }
-    } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+    } else {
+      throw Exception('Failed to fetch cart: ${response.body}');
     }
+  } catch (e) {
+    _errorMessage = e.toString().replaceFirst('Exception: ', '');
+  } finally {
+    _isLoading = false;
+    notifyListeners();
   }
+}
 
   Future<void> addToCart(String productId) async {
     _isLoading = true;
