@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
         title: Row(
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your actual logo path
+              'assets/logo.png', 
               height: 80,
             ),
             const SizedBox(width: 8),

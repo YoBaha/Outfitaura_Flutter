@@ -3,7 +3,7 @@ import 'package:outfitaura/pages/login_page.dart';
 import 'package:outfitaura/pages/recommendation_page.dart';
 import 'package:outfitaura/services/api_service.dart';
 import 'package:outfitaura/pages/wardrobe_page.dart';
-import 'package:outfitaura/pages/statistics_page.dart'; // Added for navigation
+import 'package:outfitaura/pages/statistics_page.dart'; 
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

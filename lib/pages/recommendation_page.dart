@@ -44,7 +44,7 @@ class RecommendationPage extends StatelessWidget {
               ),
             );
           }
-          if (!snapshot.hasData) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -62,10 +62,44 @@ class RecommendationPage extends StatelessWidget {
             );
           }
 
-          final recommendation = snapshot.data!.replaceFirst('Recommended: ', '').trim(); // Remove prefix
-          final clothingTypes = recommendation.split(' or ').map((e) => e.trim()).toList(); // Split on "or"
+          final recommendation = snapshot.data!.replaceFirst('Recommended: ', '').replaceFirst('👕 ', '').trim();
+          debugPrint('Recommendation raw: $recommendation');
+
+          // Split on commas and clean up
+          List<String> clothingTypes = recommendation
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+
+          // Filter out invalid types (e.g., too short or non-clothing terms)
+          const validTypes = {
+            'shorts', 'sunglasses', 't-shirt', 'windbreaker', 'hoodie', 'sweater', 'umbrella',
+            // Add other valid clothing types as needed
+          };
+          clothingTypes = clothingTypes
+              .where((type) => validTypes.contains(type.toLowerCase()))
+              .toList();
 
           debugPrint('Parsed clothing types: ${clothingTypes.join(', ')}');
+
+          if (clothingTypes.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Invalid recommendation format'),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const RecommendationPage()),
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
 
           return Center(
             child: Padding(
@@ -79,27 +113,26 @@ class RecommendationPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    recommendation,
+                    clothingTypes.join(', '),
                     style: const TextStyle(fontSize: 18, color: Colors.blue),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4ACDEB)),
-                    onPressed: clothingTypes.isNotEmpty
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SelectionPage(
-                                  clothingTypes: clothingTypes,
-                                  selectedItems: {},
-                                  currentIndex: 0,
-                                ),
-                              ),
-                            );
-                          }
-                        : null,
+                    onPressed: () {
+                      debugPrint('Navigating to SelectionPage with clothingTypes: ${clothingTypes.join(', ')}');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SelectionPage(
+                            clothingTypes: clothingTypes,
+                            selectedItems: {},
+                            currentIndex: 0,
+                          ),
+                        ),
+                      );
+                    },
                     child: const Text('Make Outfit', style: TextStyle(color: Colors.white)),
                   ),
                 ],

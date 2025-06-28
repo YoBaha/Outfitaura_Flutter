@@ -15,7 +15,7 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _ageController = TextEditingController();
-  String? _gender; // Store selected gender
+  String? _gender; 
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -89,7 +89,7 @@ class _SignupPageState extends State<SignupPage> {
         title: Row(
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your actual logo path
+              'assets/logo.png', 
               height: 80,
             ),
             const SizedBox(width: 8),

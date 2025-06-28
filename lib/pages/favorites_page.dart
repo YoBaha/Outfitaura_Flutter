@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:outfitaura/services/api_service.dart';
 import 'package:provider/provider.dart';
-import 'package:outfitaura/viewmodels/wardrobe_viewmodel.dart'; // Assuming WardrobeViewModel is used
+import 'package:outfitaura/viewmodels/wardrobe_viewmodel.dart'; 
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
@@ -13,7 +13,7 @@ class FavoritesPage extends StatelessWidget {
         title: Row(
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your logo asset
+              'assets/logo.png', 
               height: 40,
             ),
             const SizedBox(width: 8),

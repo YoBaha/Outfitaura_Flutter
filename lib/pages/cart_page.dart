@@ -14,7 +14,7 @@ class CartPage extends StatelessWidget {
         title: Row(
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your logo asset
+              'assets/logo.png', 
               height: 40,
             ),
             const SizedBox(width: 8),

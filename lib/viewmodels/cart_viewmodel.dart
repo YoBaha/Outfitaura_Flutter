@@ -59,7 +59,7 @@ Future<void> fetchCart() async {
         body: jsonEncode({'productId': productId}),
       );
       if (response.statusCode == 201) {
-        await fetchCart(); // Refresh cart after adding
+        await fetchCart(); 
       } else {
         throw Exception('Failed to add to cart: ${response.body}');
       }
@@ -82,7 +82,7 @@ Future<void> fetchCart() async {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        await fetchCart(); // Refresh cart after deletion
+        await fetchCart(); 
       } else {
         throw Exception('Failed to delete item: ${response.body}');
       }

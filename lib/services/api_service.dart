@@ -101,34 +101,37 @@ class ApiService {
     }
   }
 
-  static Future<String> getRecommendation() async {
-    try {
-      final token = await getToken();
-      for (int i = 0; i < 3; i++) {
-        final response = await http.get(
-          Uri.parse('$baseUrl/api/recommendation'),
-          headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
-        );
-        debugPrint('Recommendation response: ${response.statusCode}');
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          return data['recommendation'];
-        } else if (response.statusCode == 404) {
-          debugPrint('Recommendation not available yet: ${response.body}');
-          await Future.delayed(const Duration(seconds: 1));
-          continue;
-        } else {
-          debugPrint('Recommendation error: ${response.body}');
-          throw Exception('Failed to fetch recommendation: ${response.body}');
+static Future<String> getRecommendation() async {
+  try {
+    final token = await getToken();
+    for (int i = 0; i < 3; i++) {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/recommendation'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+      );
+      debugPrint('Recommendation response: ${response.statusCode}, Body: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final recommendation = data['recommendation']?.toString();
+        if (recommendation == null || recommendation.isEmpty) {
+          throw Exception('Empty recommendation received');
         }
+        return recommendation;
+      } else if (response.statusCode == 404) {
+        debugPrint('Recommendation not available yet: ${response.body}');
+        await Future.delayed(const Duration(seconds: 1));
+        continue;
+      } else {
+        debugPrint('Recommendation error: ${response.body}');
+        throw Exception('Failed to fetch recommendation: ${response.body}');
       }
-      throw Exception('Recommendation not available after retries');
-    } catch (e) {
-      debugPrint('Error fetching recommendation: $e');
-      throw Exception('Error fetching recommendation: $e');
     }
+    throw Exception('Recommendation not available after retries');
+  } catch (e) {
+    debugPrint('Error fetching recommendation: $e');
+    throw Exception('Error fetching recommendation: $e');
   }
-
+}
 static Future<void> uploadClothingItem(String title, XFile image) async {
   try {
     final token = await getToken();
@@ -159,7 +162,7 @@ static Future<List<ClothingItem>> getWardrobe() async {
       Uri.parse('$baseUrl/api/wardrobe'),
       headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
     );
-    debugPrint('Wardrobe response: ${response.statusCode}, Body: ${response.body}'); // Debug log
+    debugPrint('Wardrobe response: ${response.statusCode}, Body: ${response.body}'); 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((item) => ClothingItem.fromJson(item)).toList();
@@ -198,7 +201,7 @@ static Future<List<ClothingItem>> getWardrobe() async {
     String password,
     String confirmPassword,
     int age,
-    String gender, // Added gender parameter
+    String gender, 
   ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/signup'),
@@ -209,7 +212,7 @@ static Future<List<ClothingItem>> getWardrobe() async {
         'password': password,
         'confirmPassword': confirmPassword,
         'age': age,
-        'gender': gender, // Added gender to the body
+        'gender': gender, 
       }),
     );
     if (response.statusCode == 201) {

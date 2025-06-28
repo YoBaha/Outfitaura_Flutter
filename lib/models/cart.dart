@@ -2,7 +2,7 @@ import 'package:outfitaura/models/product.dart';
 
 class CartItem {
   final String id;
-  final String productId; // Should be the _id of the product
+  final String productId; 
   final String title;
   final double price;
   final String imageUrl;
@@ -63,7 +63,7 @@ class Cart {
 
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
-      id: json['_id'] as String? ?? '', // Handle null _id
+      id: json['_id'] as String? ?? '', 
       userId: json['userId'] as String,
       items: (json['items'] as List).map((item) => CartItem.fromJson(item)).toList(),
       totalPrice: (json['totalPrice'] as num).toDouble(),

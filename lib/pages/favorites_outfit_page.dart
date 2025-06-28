@@ -11,7 +11,7 @@ class FavoritesOutfitPage extends StatelessWidget {
     try {
       final items = selectedItems.entries.map((entry) => {
         'type': entry.key,
-        'clothingItemId': entry.value.id, // or _id if using that field
+        'clothingItemId': entry.value.id, 
         'title': entry.value.title,
         'imageUrl': entry.value.imageUrl,
         'createdAt': entry.value.createdAt.toIso8601String(),

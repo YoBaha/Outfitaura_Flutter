@@ -30,13 +30,13 @@ class MarketplaceViewModel extends ChangeNotifier {
   }
 
   Future<void> uploadProduct(String title, String description, double price, XFile image) async {
-    if (_errorMessage != null) return; // Prevent actions during error state
+    if (_errorMessage != null) return; 
     _isLoading = true;
     notifyListeners();
 
     try {
       await ApiService.uploadMarketplaceProduct(title, description, price, image);
-      await fetchProducts(); // Refresh list
+      await fetchProducts(); 
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {

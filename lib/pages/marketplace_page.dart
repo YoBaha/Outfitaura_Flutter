@@ -71,7 +71,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
         title: Row(
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your logo asset
+              'assets/logo.png', 
               height: 40,
             ),
             const SizedBox(width: 8),
@@ -225,7 +225,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
                                     onPressed: () {
-                                      // Implement update/delete logic here
+                                      
                                     },
                                     child: const Text('Manage Products', style: TextStyle(color: Colors.white)),
                                   ),
