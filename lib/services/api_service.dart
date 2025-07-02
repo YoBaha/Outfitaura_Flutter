@@ -175,31 +175,32 @@ static Future<List<ClothingItem>> getWardrobe() async {
   }
 }
 static Future<Map<String, dynamic>> login(String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      );
-      debugPrint('Login response: ${response.statusCode}, Body: ${response.body}');
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final token = data['token'];
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-        if (data['user'] != null) {
-          await prefs.setString('user', jsonEncode(data['user']));
-        }
-        return data;
-      } else {
-        final data = jsonDecode(response.body);
-        throw Exception(data['message'] ?? 'Login failed');
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+    debugPrint('Login response: ${response.statusCode}, Body: ${response.body}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final token = data['token'];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      if (data['user'] != null) {
+        await prefs.setString('user', jsonEncode(data['user']));
       }
-    } catch (e) {
-      debugPrint('Error during login: $e');
-      throw Exception(e.toString().replaceFirst('Exception: ', '')); 
+      debugPrint('Stored token: $token');
+      return data;
+    } else {
+      final data = jsonDecode(response.body);
+      throw Exception(data['message'] ?? 'Login failed');
     }
+  } catch (e) {
+    debugPrint('Error during login: $e');
+    throw Exception(e.toString().replaceFirst('Exception: ', ''));
   }
+}
 
  static Future<Map<String, dynamic>> signup(
     String name,
@@ -326,17 +327,24 @@ static Future<List<Map<String, dynamic>>> getFavoriteOutfits() async {
 static Future<List<Product>> getMarketplaceProducts() async {
   try {
     final token = await getToken();
+    debugPrint('Fetching products with token: $token');
+    if (token == null) {
+      throw Exception('No authentication token found');
+    }
     final response = await http.get(
       Uri.parse('$baseUrl/api/marketplace'),
       headers: {'Authorization': 'Bearer $token'},
     );
+    debugPrint('Marketplace response: ${response.statusCode}, Body: ${response.body}');
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
+      debugPrint('Parsed products data: $data');
       return data.map((json) => Product.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch products: ${response.body}');
     }
   } catch (e) {
+    debugPrint('Error fetching products: $e');
     throw Exception('Error fetching products: $e');
   }
 }
