@@ -1,6 +1,6 @@
 class ClothingItem {
-  final String id; // Maps to MongoDB _id
-  final String userId; // Maps to the user who owns the item
+  final String id; 
+  final String userId; 
   final String title;
   final String imageUrl;
   final DateTime createdAt;
@@ -15,8 +15,8 @@ class ClothingItem {
 
   factory ClothingItem.fromJson(Map<String, dynamic> json) {
     return ClothingItem(
-      id: json['_id'] as String, // Ensure _id is a string from the API
-      userId: json['userId'] as String, // Add userId
+      id: json['_id'] as String, 
+      userId: json['userId'] as String, 
       title: json['title'] as String,
       imageUrl: json['imageUrl'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),

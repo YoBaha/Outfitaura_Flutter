@@ -14,6 +14,7 @@ import 'package:outfitaura/viewmodels/marketplace_viewmodel.dart';
 import 'package:outfitaura/viewmodels/cart_viewmodel.dart';
 import 'package:outfitaura/viewmodels/statistics_viewmodel.dart';
 import 'package:outfitaura/services/api_service.dart';
+import 'package:outfitaura/pages/outfit_planner_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -53,6 +54,8 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(builder: (_) => const MarketplacePage());
             case '/cart':
               return MaterialPageRoute(builder: (_) => const CartPage());
+            case '/planner': 
+              return MaterialPageRoute(builder: (_) => const OutfitPlannerPage());
             case '/statistics':
               return MaterialPageRoute(
                 builder: (context) => FutureBuilder<Map<String, dynamic>?>(

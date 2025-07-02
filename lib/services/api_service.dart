@@ -388,4 +388,88 @@ static Future<void> deleteMarketplaceProduct(String id) async {
   }
 }
 
+// Add to existing ApiService class
+static Future<void> savePlannedOutfit(DateTime date, List<Map<String, dynamic>> items) async {
+  try {
+    final token = await getToken();
+    debugPrint('Saving planned outfit for date: $date');
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/planned-outfits'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'date': date.toIso8601String(),
+        'items': items,
+      }),
+    );
+    debugPrint('Save planned outfit response: ${response.statusCode}');
+    if (response.statusCode != 201) {
+      final responseBody = jsonDecode(response.body);
+      debugPrint('Save planned outfit error: $responseBody');
+      throw Exception('Failed to save planned outfit: ${responseBody['message']}');
+    }
+  } catch (e) {
+    debugPrint('Error saving planned outfit: $e');
+    throw Exception('Error saving planned outfit: $e');
+  }
+}
+
+static Future<List<Map<String, dynamic>>> getPlannedOutfits() async {
+  try {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/planned-outfits'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    debugPrint('Get planned outfits response: ${response.statusCode}');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data
+          .map((item) => {
+                'id': item['_id'],
+                'date': DateTime.parse(item['date']),
+                'items': (item['items'] as List).map((i) => {
+                      'type': i['type'],
+                      'clothingItemId': i['clothingItemId'],
+                      'title': i['title'],
+                      'imageUrl': i['imageUrl'],
+                      'createdAt': DateTime.parse(i['createdAt']),
+                    }).toList(),
+                'createdAt': DateTime.parse(item['createdAt']),
+              })
+          .toList();
+    } else {
+      debugPrint('Get planned outfits error: ${response.body}');
+      throw Exception('Failed to fetch planned outfits: ${response.body}');
+    }
+  } catch (e) {
+    debugPrint('Error fetching planned outfits: $e');
+    throw Exception('Error fetching planned outfits: $e');
+  }
+}
+
+static Future<void> deletePlannedOutfit(String id) async {
+  try {
+    final token = await getToken();
+    debugPrint('Deleting planned outfit with id: $id');
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/planned-outfits/$id'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    debugPrint('Delete planned outfit response: ${response.statusCode}');
+    if (response.statusCode != 200) {
+      final responseBody = jsonDecode(response.body);
+      debugPrint('Delete planned outfit error: $responseBody');
+      throw Exception('Failed to delete planned outfit: ${responseBody['message']}');
+    }
+  } catch (e) {
+    debugPrint('Error deleting planned outfit: $e');
+    throw Exception('Error deleting planned outfit: $e');
+  }
+}
+
 }

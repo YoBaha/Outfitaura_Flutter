@@ -79,6 +79,10 @@ class HomePage extends StatelessWidget {
           const SizedBox(width: 8),
           _categoryIcon(Icons.favorite, 'Favorites', primaryColor,
               onTap: () => Navigator.pushNamed(context, '/favorites')),
+                      const SizedBox(width: 8),
+        _categoryIcon(Icons.calendar_today, 'Planner', primaryColor,
+            onTap: () => Navigator.pushNamed(context, '/planner')),
+
           // Add Statistics for admins
           FutureBuilder<Map<String, dynamic>?>(
             future: ApiService.getUser(),
