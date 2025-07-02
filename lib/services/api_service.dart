@@ -472,4 +472,31 @@ static Future<void> deletePlannedOutfit(String id) async {
   }
 }
 
+// feedback subm
+static Future<void> submitFeedback(int rating, String message) async {
+  try {
+    final token = await getToken();
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/feedback'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'rating': rating,
+        'message': message,
+      }),
+    );
+    debugPrint('Submit feedback response: ${response.statusCode}, Body: ${response.body}');
+    if (response.statusCode != 201) {
+      final responseBody = jsonDecode(response.body);
+      throw Exception('Failed to submit feedback: ${responseBody['message']}');
+    }
+  } catch (e) {
+    debugPrint('Error submitting feedback: $e');
+    throw Exception('Error submitting feedback: $e');
+  }
+}
+
 }

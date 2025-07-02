@@ -82,6 +82,9 @@ class HomePage extends StatelessWidget {
                       const SizedBox(width: 8),
         _categoryIcon(Icons.calendar_today, 'Planner', primaryColor,
             onTap: () => Navigator.pushNamed(context, '/planner')),
+          const SizedBox(width: 8),
+        _categoryIcon(Icons.feedback, 'Feedback', primaryColor,
+            onTap: () => Navigator.pushNamed(context, '/feedback')),
 
           // Add Statistics for admins
           FutureBuilder<Map<String, dynamic>?>(
