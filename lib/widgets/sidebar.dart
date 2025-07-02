@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:outfitaura_admin_web/services/api_service.dart';
+import 'package:outfitaura_admin_web/views/login_page.dart';
 import '../views/home_page.dart';
 import '../views/marketplace_page.dart';
 import '../views/stats_page.dart';
+import '../views/feedback_page.dart'; 
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -38,6 +41,22 @@ class Sidebar extends StatelessWidget {
             title: const Text('Statistics', style: TextStyle(color: Colors.white)),
             onTap: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const StatsPage())),
+          ),
+          ListTile(
+            title: const Text('Feedback', style: TextStyle(color: Colors.white)),
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const FeedbackPage())),
+          ),
+          ListTile(
+            title: const Text('Logout', style: TextStyle(color: Colors.white)),
+            onTap: () async {
+              await ApiService.logout();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()), // Adjust path
+                (Route<dynamic> route) => false,
+              );
+            },
           ),
         ],
       ),

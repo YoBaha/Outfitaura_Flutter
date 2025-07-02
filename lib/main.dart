@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:outfitaura_admin_web/views/feedback_page.dart';
 import 'package:provider/provider.dart';
 import 'views/login_page.dart';
 import 'views/home_page.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginPage(),
           '/home': (context) => const HomePage(),
           '/marketplace': (context) => const MarketplacePage(),
+          '/feedback': (context) => const FeedbackPage(),
           '/stats': (context) => const StatsPage(),
         },
       ),

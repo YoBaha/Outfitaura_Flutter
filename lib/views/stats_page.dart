@@ -9,7 +9,6 @@ class StatsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get screen height for responsive chart sizing
     final screenHeight = MediaQuery.of(context).size.height;
 
     return ChangeNotifierProvider(
@@ -37,7 +36,6 @@ class StatsPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          // Refresh Button
                           Align(
                             alignment: Alignment.centerRight,
                             child: ElevatedButton(
@@ -63,7 +61,65 @@ class StatsPage extends StatelessWidget {
                               style: const TextStyle(
                                   color: Color(0xFFE15757), fontSize: 16),
                             )
-                          else if (viewModel.stats != null) ...[
+                          else if (viewModel.stats != null && viewModel.feedbackStats != null) ...[
+                            // Feedback Statistics
+                            const Text(
+                              'Feedback Statistics',
+                              style: TextStyle(
+                                  fontSize: 20, color: Color(0xFF007180)),
+                            ),
+                            const SizedBox(height: 10),
+                            Card(
+                              elevation: 6,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15)),
+                              color: const Color(0xFF82BECC),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Average Rating: ${viewModel.feedbackStats!['averageRating'].toStringAsFixed(1)}',
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                                    Text(
+                                      'Total Feedback: ${viewModel.feedbackStats!['totalFeedback']}',
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: screenHeight * 0.3,
+                              child: PieChart(
+                                PieChartData(
+                                  sections: List.generate(5, (index) {
+                                    final rating = (index + 1).toString();
+                                    final count = viewModel.feedbackStats!['ratingDistribution'][rating] ?? 0;
+                                    final total = viewModel.feedbackStats!['totalFeedback'] ?? 1;
+                                    final percentage = (count / total * 100).toStringAsFixed(1);
+                                    return PieChartSectionData(
+                                      value: count.toDouble(),
+                                      title: count > 0 ? '$rating★\n$percentage%' : '',
+                                      color: [
+                                        const Color(0xFFE15757), // 1-star
+                                        const Color(0xFFFFA500), // 2-star
+                                        const Color(0xFFFFFF00), // 3-star
+                                        const Color(0xFF4ACDEB), // 4-star
+                                        const Color(0xFF007180), // 5-star
+                                      ][index],
+                                      radius: 100,
+                                    );
+                                  }).where((section) => section.value > 0).toList(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
                             // Most Bought Items Bar Chart
                             const Text(
                               'Most Bought Items',
@@ -72,7 +128,7 @@ class StatsPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             SizedBox(
-                              height: screenHeight * 0.3, // Responsive height
+                              height: screenHeight * 0.3,
                               child: BarChart(
                                 BarChartData(
                                   titlesData: FlTitlesData(
@@ -133,7 +189,7 @@ class StatsPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             SizedBox(
-                              height: screenHeight * 0.3, // Responsive height
+                              height: screenHeight * 0.3,
                               child: PieChart(
                                 PieChartData(
                                   sections: viewModel.stats!.genderPercentages
@@ -151,7 +207,7 @@ class StatsPage extends StatelessWidget {
                               ),
                             ),
                           ],
-                          const SizedBox(height: 20), // Extra padding at bottom
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),

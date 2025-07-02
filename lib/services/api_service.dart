@@ -5,10 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/product.dart';
 import '../models/stats.dart';
+import '../models/feedback.dart'; 
 import 'package:flutter/foundation.dart' show kIsWeb;
+import '../models/feedback.dart' as CustomFeedback; 
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api'; // Update for production
+  static const String baseUrl = 'http://localhost:5000/api'; 
 
   static Future<Map<String, dynamic>> adminLogin(String email, String password) async {
     final response = await http.post(
@@ -61,7 +63,6 @@ class ApiService {
     request.fields['price'] = price.toString();
 
     if (kIsWeb) {
-      // Web: Use bytes from XFile
       final bytes = await image.readAsBytes();
       request.files.add(http.MultipartFile.fromBytes(
         'image',
@@ -69,7 +70,6 @@ class ApiService {
         filename: image.name,
       ));
     } else {
-      // Mobile: Use file path
       request.files.add(await http.MultipartFile.fromPath('image', image.path));
     }
 
@@ -89,7 +89,6 @@ class ApiService {
 
     if (image != null) {
       if (kIsWeb) {
-        // Web: Use bytes from XFile
         final bytes = await image.readAsBytes();
         request.files.add(http.MultipartFile.fromBytes(
           'image',
@@ -97,7 +96,6 @@ class ApiService {
           filename: image.name,
         ));
       } else {
-        // Mobile: Use file path
         request.files.add(await http.MultipartFile.fromPath('image', image.path));
       }
     }
@@ -141,4 +139,60 @@ class ApiService {
       throw Exception('Failed to fetch stats: ${mostBoughtResponse.body}');
     }
   }
+//feedback
+  static Future<List<CustomFeedback.Feedback>> getFeedback() async {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/feedback'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => CustomFeedback.Feedback.fromJson(item)).toList();
+    } else {
+      throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch feedback');
+    }
+  }
+  static Future<Map<String, dynamic>> getFeedbackStats() async {
+  final token = await getToken();
+  final response = await http.get(
+    Uri.parse('$baseUrl/feedback/stats'),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch feedback stats');
+  }
+}
+//get counts mil db
+static Future<Map<String, dynamic>> getDashboardCounts() async {
+  final token = await getToken();
+  final response = await http.get(
+    Uri.parse('$baseUrl/stats/counts'),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch dashboard counts');
+  }
+}
+
+static Future<List<Map<String, dynamic>>> getUsers() async {
+  final token = await getToken();
+  final response = await http.get(
+    Uri.parse('$baseUrl/users'),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (response.statusCode == 200) {
+    return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+  } else {
+    throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch users');
+  }
+}
 }
