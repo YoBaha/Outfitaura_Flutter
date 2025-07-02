@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:outfitaura/models/clothing_item.dart';
 import 'package:outfitaura/viewmodels/wardrobe_viewmodel.dart';
 import 'package:outfitaura/pages/favorites_outfit_page.dart';
+import 'package:outfitaura/pages/extensions.dart'; // Import the consolidated extension
 
 class SelectionPage extends StatelessWidget {
   final List<String> clothingTypes;
@@ -16,6 +17,21 @@ class SelectionPage extends StatelessWidget {
     required this.currentIndex,
   });
 
+  // Fuzzy matching for clothing types
+  bool matchesType(String itemTitle, String currentType) {
+    final normalizedItemTitle = itemTitle.toLowerCase().trim();
+    final normalizedCurrentType = currentType.toLowerCase().trim();
+    // Exact match
+    if (normalizedItemTitle == normalizedCurrentType) return true;
+    // Partial match (e.g., "Blue T-shirt" matches "t-shirt")
+    if (normalizedItemTitle.contains(normalizedCurrentType)) return true;
+    // Handle common variations
+    if (normalizedCurrentType == 't-shirt' && normalizedItemTitle.contains('tshirt')) return true;
+    if (normalizedCurrentType == 'jeans' && normalizedItemTitle.contains('jean')) return true;
+    if (normalizedCurrentType == 'windbreaker' && normalizedItemTitle.contains('wind breaker')) return true;
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<WardrobeViewModel>(context, listen: false);
@@ -26,7 +42,7 @@ class SelectionPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select ${clothingTypes[currentIndex]}'),
+        title: Text('Select ${clothingTypes[currentIndex].capitalize()}'),
       ),
       body: FutureBuilder<void>(
         future: viewModel.fetchFuture,
@@ -54,14 +70,15 @@ class SelectionPage extends StatelessWidget {
           debugPrint('Wardrobe items: ${viewModel.items.map((i) => i.title).join(', ')}');
           final matchingItems = viewModel.items.where((item) {
             final itemTitle = item.title.toLowerCase().trim();
-            debugPrint('Comparing item: "$itemTitle" with currentType: "$currentType"');
-            return itemTitle == currentType;
+            final isMatch = matchesType(itemTitle, currentType);
+            debugPrint('Comparing item: "$itemTitle" with currentType: "$currentType" -> Match: $isMatch');
+            return isMatch;
           }).toList();
           debugPrint('Matching items for $currentType: ${matchingItems.map((i) => i.title).join(', ')}');
 
-          // Check if currentType is valid
           const validTypes = {
             'shorts', 'sunglasses', 't-shirt', 'windbreaker', 'hoodie', 'sweater', 'umbrella',
+            'jacket', 'shirt', 'pants', 'dress', 'skirt', 'hat', 'scarf', 'gloves', 'warm clothes', 'jeans'
           };
           final isValidType = validTypes.contains(currentType);
 
@@ -75,6 +92,8 @@ class SelectionPage extends StatelessWidget {
                             ? 'No items available for $currentType.'
                             : 'Invalid clothing type: ${clothingTypes[currentIndex]}.',
                       ),
+                      const SizedBox(height: 10),
+                      Text('Available wardrobe items: ${viewModel.items.map((i) => i.title).join(', ')}'),
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => viewModel.fetchWardrobe(),

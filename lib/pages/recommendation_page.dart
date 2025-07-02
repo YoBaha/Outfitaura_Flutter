@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:outfitaura/services/api_service.dart';
 import 'package:outfitaura/pages/selection_page.dart';
+import 'package:outfitaura/pages/extensions.dart';
 
 class RecommendationPage extends StatelessWidget {
   const RecommendationPage({super.key});
@@ -84,29 +85,39 @@ class RecommendationPage extends StatelessWidget {
               );
             }
 
-            final recommendation = snapshot.data!.replaceFirst('Recommended: ', '').replaceFirst('👕 ', '').trim();
+            // Normalize recommendation string
+            final recommendation = snapshot.data!
+                .replaceFirst(RegExp(r'👕\s*Recommended:\s*'), '') // Remove emoji and "Recommended:"
+                .replaceAll(RegExp(r'[^\w\s,-]'), '') // Remove special characters except commas and hyphens
+                .trim();
             debugPrint('Recommendation raw: $recommendation');
 
-            // Split on " or " or "," (with optional spaces)
+            // Split on commas, "or", or multiple spaces
             List<String> clothingTypes = recommendation
-                .split(RegExp(r'\s*( or |,)\s*'))
-                .map((e) => e.trim())
+                .split(RegExp(r'\s*(,|or|\s+)\s*'))
+                .map((e) => e.trim().toLowerCase())
                 .where((e) => e.isNotEmpty)
                 .toList();
 
-            // Define valid clothing types (lowercase for consistency)
+            // Define valid clothing types
             const validTypes = {
               'shorts', 'sunglasses', 't-shirt', 'windbreaker', 'hoodie', 'sweater', 'umbrella',
-              'jacket', 'shirt', 'pants', 'dress', 'skirt', 'hat', 'scarf', 'gloves','warm clothes','jeans'
+              'jacket', 'shirt', 'pants', 'dress', 'skirt', 'hat', 'scarf', 'gloves', 'warm clothes', 'jeans'
             };
 
-            // Filter and normalize clothing types
+            // Normalize and filter clothing types
             clothingTypes = clothingTypes
-                .map((type) => type.toLowerCase())
+                .map((type) {
+                  // Handle common variations
+                  if (type.contains('tshirt')) return 't-shirt';
+                  if (type.contains('jean')) return 'jeans';
+                  if (type.contains('wind breaker') || type.contains('windbreaker')) return 'windbreaker';
+                  return type;
+                })
                 .where((type) => validTypes.contains(type))
-                .toList();
+                .toSet()
+                .toList(); // Remove duplicates
 
-            debugPrint('After split: ${recommendation.split(RegExp(r'\s*( or |,)\s*'))}');
             debugPrint('Parsed clothing types: ${clothingTypes.join(', ')}');
 
             if (clothingTypes.isEmpty) {
@@ -185,13 +196,5 @@ class RecommendationPage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-// Extension to capitalize strings for display
-extension StringExtension on String {
-  String capitalize() {
-    if (isEmpty) return this;
-    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
   }
 }

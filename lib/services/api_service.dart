@@ -174,24 +174,30 @@ static Future<List<ClothingItem>> getWardrobe() async {
     throw Exception('Error fetching wardrobe: $e');
   }
 }
-  static Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final token = data['token'];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-      if (data['user'] != null) {
-        await prefs.setString('user', jsonEncode(data['user']));
+static Future<Map<String, dynamic>> login(String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+      debugPrint('Login response: ${response.statusCode}, Body: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        if (data['user'] != null) {
+          await prefs.setString('user', jsonEncode(data['user']));
+        }
+        return data;
+      } else {
+        final data = jsonDecode(response.body);
+        throw Exception(data['message'] ?? 'Login failed');
       }
-      return data;
-    } else {
-      final data = jsonDecode(response.body);
-      throw Exception(data['message'] ?? 'Login failed');
+    } catch (e) {
+      debugPrint('Error during login: $e');
+      throw Exception(e.toString().replaceFirst('Exception: ', '')); 
     }
   }
 
