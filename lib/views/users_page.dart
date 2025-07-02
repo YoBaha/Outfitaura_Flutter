@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/users_view_model.dart';
 import '../widgets/sidebar.dart';
+import './send_email_page.dart';
 
 class UsersPage extends StatelessWidget {
   const UsersPage({super.key});
@@ -95,6 +96,7 @@ class UsersPage extends StatelessWidget {
                                 elevation: 6,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                 child: DataTable(
+                                  columnSpacing: 20,
                                   columns: const [
                                     DataColumn(
                                         label: Text('Name',
@@ -105,12 +107,31 @@ class UsersPage extends StatelessWidget {
                                     DataColumn(
                                         label: Text('Email',
                                             style: TextStyle(color: Color(0xFF007180)))),
+                                    DataColumn(
+                                        label: Text('Action',
+                                            style: TextStyle(color: Color(0xFF007180)))),
                                   ],
                                   rows: viewModel.users.map((user) {
                                     return DataRow(cells: [
                                       DataCell(Text(user['name']?.toString() ?? 'N/A')),
                                       DataCell(Text(user['gender']?.toString() ?? 'N/A')),
                                       DataCell(Text(user['email']?.toString() ?? 'N/A')),
+                                      DataCell(
+                                        IconButton(
+                                          icon: const Icon(Icons.email, color: Color(0xFF4ACDEB)),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => SendEmailPage(
+                                                  email: user['email']?.toString() ?? '',
+                                                  username: user['name']?.toString() ?? 'N/A',
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ]);
                                   }).toList(),
                                 ),

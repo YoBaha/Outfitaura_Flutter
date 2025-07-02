@@ -8,6 +8,9 @@ import '../models/stats.dart';
 import '../models/feedback.dart'; 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/feedback.dart' as CustomFeedback; 
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:flutter/foundation.dart'; 
 
 class ApiService {
   static const String baseUrl = 'http://localhost:5000/api'; 
@@ -194,5 +197,33 @@ static Future<List<Map<String, dynamic>>> getUsers() async {
   } else {
     throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch users');
   }
-}
+
+
+//email
+}  static Future<void> sendEmail({
+    required String email,
+    required String subject,
+    required String body,
+  }) async {
+    final token = await getToken();
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.post(
+      Uri.parse('$baseUrl/email/send'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'email': email,
+        'subject': subject,
+        'body': body,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      debugPrint('Error sending email: ${response.body}');
+      throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to send email');
+    }
+    debugPrint('Email sent successfully: ${response.body}');
+  }
 }
