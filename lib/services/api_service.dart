@@ -185,22 +185,25 @@ static Future<Map<String, dynamic>> getDashboardCounts() async {
   }
 }
 
-static Future<List<Map<String, dynamic>>> getUsers() async {
-  final token = await getToken();
-  final response = await http.get(
-    Uri.parse('$baseUrl/users'),
-    headers: {'Authorization': 'Bearer $token'},
-  );
+  static Future<List<Map<String, dynamic>>> getUsers() async {
+    final token = await getToken();
+    if (token == null) throw Exception('No authentication token found');
+    final response = await http.get(
+      Uri.parse('$baseUrl/users'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
 
-  if (response.statusCode == 200) {
-    return List<Map<String, dynamic>>.from(jsonDecode(response.body));
-  } else {
-    throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch users');
+    if (response.statusCode == 200) {
+      final users = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      debugPrint('ApiService.getUsers: $users'); // Debug log
+      return users;
+    } else {
+      throw Exception(jsonDecode(response.body)['message'] ?? 'Failed to fetch users');
+    }
   }
 
-
 //email
-}  static Future<void> sendEmail({
+  static Future<void> sendEmail({
     required String email,
     required String subject,
     required String body,

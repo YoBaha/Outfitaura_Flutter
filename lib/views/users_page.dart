@@ -21,6 +21,12 @@ class UsersPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Consumer<UsersViewModel>(
                   builder: (context, viewModel, _) {
+                    final filteredUsers = viewModel.users.where((user) {
+                      final query = viewModel.searchQuery.toLowerCase();
+                      return (user['name']?.toLowerCase() ?? '').contains(query) ||
+                          (user['email']?.toLowerCase() ?? '').contains(query);
+                    }).toList();
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -33,7 +39,6 @@ class UsersPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // Search Field
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Row(
@@ -41,7 +46,7 @@ class UsersPage extends StatelessWidget {
                               Expanded(
                                 child: TextField(
                                   decoration: InputDecoration(
-                                    hintText: 'Search users by name...',
+                                    hintText: 'Search users by name or email...',
                                     prefixIcon: const Icon(Icons.search, color: Color(0xFF007180)),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10),
@@ -73,6 +78,18 @@ class UsersPage extends StatelessWidget {
                                 },
                                 child: const Text('Clear'),
                               ),
+                              const SizedBox(width: 10),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF4ACDEB),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () => viewModel.fetchUsers(),
+                                child: const Text('Refresh'),
+                              ),
                             ],
                           ),
                         ),
@@ -80,11 +97,19 @@ class UsersPage extends StatelessWidget {
                         if (viewModel.isLoading)
                           const Center(child: CircularProgressIndicator(color: Color(0xFF007180)))
                         else if (viewModel.errorMessage != null)
-                          Text(
-                            viewModel.errorMessage!,
-                            style: const TextStyle(color: Color(0xFFE15757), fontSize: 16),
+                          Column(
+                            children: [
+                              Text(
+                                viewModel.errorMessage!,
+                                style: const TextStyle(color: Color(0xFFE15757), fontSize: 16),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => viewModel.fetchUsers(),
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           )
-                        else if (viewModel.users.isEmpty)
+                        else if (filteredUsers.isEmpty)
                           const Text(
                             'No users available',
                             style: TextStyle(color: Color(0xFF007180), fontSize: 16),
@@ -108,28 +133,79 @@ class UsersPage extends StatelessWidget {
                                         label: Text('Email',
                                             style: TextStyle(color: Color(0xFF007180)))),
                                     DataColumn(
+                                        label: Text('Status',
+                                            style: TextStyle(color: Color(0xFF007180)))),
+                                    DataColumn(
                                         label: Text('Action',
                                             style: TextStyle(color: Color(0xFF007180)))),
                                   ],
-                                  rows: viewModel.users.map((user) {
+                                  rows: filteredUsers.map((user) {
                                     return DataRow(cells: [
                                       DataCell(Text(user['name']?.toString() ?? 'N/A')),
                                       DataCell(Text(user['gender']?.toString() ?? 'N/A')),
                                       DataCell(Text(user['email']?.toString() ?? 'N/A')),
                                       DataCell(
-                                        IconButton(
-                                          icon: const Icon(Icons.email, color: Color(0xFF4ACDEB)),
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => SendEmailPage(
-                                                  email: user['email']?.toString() ?? '',
-                                                  username: user['name']?.toString() ?? 'N/A',
-                                                ),
+                                        Text(
+                                          (user['status']?.toString() ?? 'Unknown').toUpperCase(),
+                                          style: TextStyle(
+                                            color: user['status'] == 'inactive' ? Colors.red : Colors.green,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(
+                                                user['status'] == 'inactive'
+                                                    ? Icons.lock
+                                                    : Icons.lock_open,
+                                                color: const Color(0xFF4ACDEB),
                                               ),
-                                            );
-                                          },
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    title: const Text('Confirm Status Change'),
+                                                    content: Text(
+                                                      'Change status of ${user['name']} to ${user['status'] == 'active' ? 'inactive' : 'active'}?',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context),
+                                                        child: const Text('Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          viewModel.toggleUserStatus(
+                                                            user['_id'],
+                                                            user['status'] ?? 'active',
+                                                          );
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: const Text('Confirm'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.email, color: Color(0xFF4ACDEB)),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => SendEmailPage(
+                                                      email: user['email']?.toString() ?? '',
+                                                      username: user['name']?.toString() ?? 'N/A',
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ]);
